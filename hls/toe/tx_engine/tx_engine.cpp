@@ -1486,8 +1486,15 @@ void txEngMemAccessBreakdown(	hls::stream<mmCmd>&	inputMemAccess,
 		}
 		break;
 	case 1:
-			outputMemAccess.write(mmCmd(0, cmd.bbt - lengthFirstAccess));
-			txEngBreakdownState = 0;
+		// LittleBlack
+		static ap_uint<32> pkgAddr;
+		pkgAddr(31, 30) = cmd.saddr(31, 30);
+		pkgAddr(29, WINDOW_BITS) = cmd.saddr(29, WINDOW_BITS);
+		pkgAddr(WINDOW_BITS-1, 0) = 0; 
+		outputMemAccess.write(mmCmd(pkgAddr, cmd.bbt - lengthFirstAccess));
+		// outputMemAccess.write(mmCmd(0, cmd.bbt - lengthFirstAccess));
+
+		txEngBreakdownState = 0;
 		break;
 	}
 }
