@@ -96,7 +96,8 @@ void txAppStatusHandler(stream<mmStatus>&				txBufferWriteStatus,
 			if (status.okay)
 			{
 				ap_uint<WINDOW_BITS+1> tempLength = ev.address + ev.length;
-				if (tempLength[WINDOW_BITS] == 1)// tempLength > BUFFER_SIZE
+				// LittleBlack
+        			if ((tempLength[WINDOW_BITS] == 1) && (tempLength(WINDOW_BITS-1,0) != 0))// tempLength > BUFFER_SIZE
 				{
 					tash_state = READ_STATUS_2;
 				}
