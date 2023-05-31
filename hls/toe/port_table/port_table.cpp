@@ -110,15 +110,43 @@ void free_port_table(	stream<ap_uint<16> >&	sLookup2portTable_releasePort,
 	//static stream<ap_uint<16> > pt_freePortsFifo("pt_freePortsFifo");
 	//#pragma HLS STREAM variable=pt_freePortsFifo depth=8
 
-	static ap_uint<15>	pt_cursor = 0;
+	//Little_Black
+	// static ap_uint<15>	pt_cursor = 0;
+	static ap_uint<15>	pt_cursor = 659;
 
 	ap_uint<16>			currPort;
 	ap_uint<16>			freePort;
+	//Little_Black
+	// if (!sLookup2portTable_releasePort.empty()) //check range, TODO make sure no acces to same location in 2 consecutive cycles
+	// {
+	// 	sLookup2portTable_releasePort.read(currPort);
+	// 	if (currPort >= 32768)
+	// 	{
+	// 		freePortTable[currPort(14, 0)] = false; //shift
+	// 	}
+	// }
+	// else if (!pt_portCheckUsed_req_fifo.empty())
+	// {
+	// 	pt_portCheckUsed_rsp_fifo.write(freePortTable[pt_portCheckUsed_req_fifo.read()]);
+	// }
+	// else
+	// {
+	// 	if (!freePortTable[pt_cursor] && !portTable2txApp_port_rsp.full()) //This is not perfect, but yeah
+	// 	{
+	// 		freePort(14, 0) = pt_cursor;
+	// 		freePort[15] = 1;
+	// 		freePortTable[pt_cursor] = true;
+	// 		portTable2txApp_port_rsp.write(freePort);
+	// 	}
+	// }
+	// pt_cursor++;
 
+	//Little_Black
 	if (!sLookup2portTable_releasePort.empty()) //check range, TODO make sure no acces to same location in 2 consecutive cycles
 	{
 		sLookup2portTable_releasePort.read(currPort);
-		if (currPort >= 32768)
+		// if (currPort >= 32768)
+		if (currPort < 32768)
 		{
 			freePortTable[currPort(14, 0)] = false; //shift
 		}
@@ -132,12 +160,19 @@ void free_port_table(	stream<ap_uint<16> >&	sLookup2portTable_releasePort,
 		if (!freePortTable[pt_cursor] && !portTable2txApp_port_rsp.full()) //This is not perfect, but yeah
 		{
 			freePort(14, 0) = pt_cursor;
-			freePort[15] = 1;
+			// freePort[15] = 1;
+			freePort[15] = 0;
 			freePortTable[pt_cursor] = true;
 			portTable2txApp_port_rsp.write(freePort);
 		}
 	}
-	pt_cursor++;
+	// pt_cursor++;
+	if(pt_cursor == 1023){
+		pt_cursor = 103;
+	}else{
+		pt_cursor = pt_cursor + 1;
+	}
+	//Little_Black
 
 	/*if (!txApp2portTable_port_req.empty()) //Fixme this!!!
 	{
@@ -166,7 +201,9 @@ void check_in_multiplexer(	stream<ap_uint<16> >&		rxEng2portTable_check_req,
 		rxEng2portTable_check_req.read(checkPort);
 		swappedCheckPort(7, 0) = checkPort(15, 8);
 		swappedCheckPort(15, 8) = checkPort(7, 0);
-		if (swappedCheckPort < 32768)
+		// Little_Black
+		// if (swappedCheckPort < 32768)
+		if (swappedCheckPort >= 32768)
 		{
 			pt_portCheckListening_req_fifo.write(swappedCheckPort);
 			pt_dstFifoOut.write(LT);
